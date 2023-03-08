@@ -1,6 +1,16 @@
 #!/usr/bin/env python
 
 import scapy.all as scapy
+import argparse #newer version of optparse(deprecated)
+import warnings
+
+warnings.filterwarnings("ignore")
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--target", dest="target", help="Ip range as an input for a scan")
+    options = parser.parse_args()
+    return options
 
 def scan(ip):
     arp_request = scapy.ARP(pdst=ip)
@@ -12,7 +22,13 @@ def scan(ip):
     for element in answered_list:
         client_dict = {"ip": element[1].psrc, "mac": element[1].hwsrc}
         clients_list.append(client_dict)
-        print(element[1].psrc + element[1].hwsrc)
-    print(clients_list)
+    return clients_list
 
-scan("192.168.1.1/24")
+def print_result(results_list):
+    print("IP\t\t\tMac Address\n -----------------------------------------")
+    for client in results_list:
+        print(client["ip"] + "\t\t" + client["mac"])
+
+options = get_arguments()
+scan_result = scan(options.target)
+print_result(scan_result)
